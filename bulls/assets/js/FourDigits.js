@@ -13,12 +13,6 @@ Specifically:
  */
 
 function FourDigits() {
-    // const [guesses, setGuesses] = useState([]);
-    // const [guess, setGuess] = useState("");
-    // const [secret, setSecret] = useState(generateSecret());
-    // const [hints, setHints] = useState([]);
-    // const [status, setStatus] = useState("");
-
     const [gameState, setGameState] = useState({
         guesses: [],
         guess: "",
@@ -26,9 +20,6 @@ function FourDigits() {
         hints: [],
         status: ""
     });
-
-    let {guesses, guess, secret, hints, status} = gameState;
-
 
     /**
      * Event handler for handling change of the text field
@@ -38,6 +29,7 @@ function FourDigits() {
      */
     function updateGuess(ev) {
         if (hasGameEnded(gameState.guesses, gameState.secret)) {
+            console.log("update guess -> game ended")
             return;
         }
         let text = ev.target.value;
@@ -45,10 +37,8 @@ function FourDigits() {
         if (fieldLength > 4) {
             text = text.substr(0, 4);
         }
-        let status = text;
-        let state1 = Object.assign({}, gameState, {status});
-        setGameState(state1);
-        // setGuess(text);
+        let newState = Object.assign({}, gameState, {guess: text});
+        setGameState(newState);
     }
 
 
@@ -60,33 +50,28 @@ function FourDigits() {
      */
     function makeGuess() {
         if (hasGameEnded(gameState.guesses, gameState.secret)) {
+            console.log("make guess -> game ended");
             return;
         }
         if (isValidInput(gameState.guess)) {
-            let newStatus = "";
-            let state1 = Object.assign({}, gameState, {newStatus});
-            setGameState(state1);
-            // setStatus("");
+            console.log("valid input ->");
             console.log("secret: " + gameState.secret);
             let newGuesses = gameState.guesses.concat(gameState.guess);
-            let state2 = Object.assign({}, gameState, {newGuesses});
-            setGameState(state2);
-            // setGuesses(guesses.concat(guess));
-            let newGuess = "";
-            let state3 = Object.assign({}, gameState, {newGuess});
-            setGameState(state3);
-            // setGuess("");
             let newHints = gameState.hints.concat(getHint(gameState.secret, gameState.guess));
-            let state4 = Object.assign({}, gameState, {newHints});
-            setGameState(state4);
-            // setHints(hints.concat(getHint(secret, guess)));
+            let newState = Object.assign({}, gameState, {
+                guesses: newGuesses,
+                guess: "",
+                hints: newHints,
+                status: ""
+            });
+            setGameState(newState);
             console.log("num guesses: " + gameState.guesses.length);
+            console.log("guesses -> " + gameState.guesses.toString());
         } else {
             console.log("bad input");
             let newStatus = "A guess must be a 4-digit unique integer (1-9)";
-            let state5 = Object.assign({}, gameState, {newStatus});
-            setGameState(state5);
-            // setStatus("A guess must be a 4-digit unique integer (1-9)");
+            let newState = Object.assign({}, gameState, {status: newStatus});
+            setGameState(newState);
         }
     }
 
@@ -99,11 +84,14 @@ function FourDigits() {
      */
     function keypress(ev) {
         if (hasGameEnded(gameState.guesses, gameState.secret)) {
+            console.log("game ended");
             return;
         }
         if (ev.key === "Enter") {
+            console.log("enter pressed");
             makeGuess();
         }
+        console.log("key pressed: " + ev.key);
     }
 
 
@@ -111,19 +99,14 @@ function FourDigits() {
      * Resets the game by clearing all the sates.
      */
     function reset() {
-        let guesses = [];
-        let guess = "";
-        let hints = [];
-        let status = "";
-        let secret = generateSecret();
-        let state = Object.assign({}, gameState, {guesses}, {guess}, {hints}, {status}, {secret});
-        setGameState(state);
-
-        // setGuesses([]);
-        // setGuess("");
-        // setHints([]);
-        // setStatus("");
-        // setSecret(generateSecret);
+        let newState = Object.assign({}, gameState, {
+            guesses: [],
+            guess: "",
+            hints: [],
+            status: "",
+            secret: generateSecret()
+        });
+        setGameState(newState);
     }
 
     return (
@@ -167,6 +150,30 @@ function FourDigits() {
      * @constructor
      */
     function ResultTable({guesses, hints}) {
+        let guessesHints = [];
+
+        for (let i = 0; i < 8; ++i) {
+            guessesHints.push(
+                <div className="row">
+                    <div className="column">
+                        <p>{i + 1}</p>
+                    </div>
+                    <div className="column">
+                        <p>
+                            {guesses[i]}
+                        </p>
+                    </div>
+                    <div className="column">
+                        <p>
+                            {hints[i]}
+                        </p>
+                    </div>
+                </div>
+            );
+        }
+
+        console.log("result table render");
+
         return (
             <div className="results">
                 <div className="row">
@@ -186,126 +193,7 @@ function FourDigits() {
                         </div>
                     </div>
                 </div>
-                <div className="row">
-                    <div className="column">
-                        <p>1</p>
-                    </div>
-                    <div className="column">
-                        <p>
-                            {guesses[0]}
-                        </p>
-                    </div>
-                    <div className="column">
-                        <p>
-                            {hints[0]}
-                        </p>
-                    </div>
-                </div>
-                <div className="row">
-                    <div className="column">
-                        <p>2</p>
-                    </div>
-                    <div className="column">
-                        <p>
-                            {guesses[1]}
-                        </p>
-                    </div>
-                    <div className="column">
-                        <p>
-                            {hints[1]}
-                        </p>
-                    </div>
-                </div>
-                <div className="row">
-                    <div className="column">
-                        <p>3</p>
-                    </div>
-                    <div className="column">
-                        <p>
-                            {guesses[2]}
-                        </p>
-                    </div>
-                    <div className="column">
-                        <p>
-                            {hints[2]}
-                        </p>
-                    </div>
-                </div>
-                <div className="row">
-                    <div className="column">
-                        <p>4</p>
-                    </div>
-                    <div className="column">
-                        <p>
-                            {guesses[3]}
-                        </p>
-                    </div>
-                    <div className="column">
-                        <p>
-                            {hints[3]}
-                        </p>
-                    </div>
-                </div>
-                <div className="row">
-                    <div className="column">
-                        <p>5</p>
-                    </div>
-                    <div className="column">
-                        <p>
-                            {guesses[4]}
-                        </p>
-                    </div>
-                    <div className="column">
-                        <p>
-                            {hints[4]}
-                        </p>
-                    </div>
-                </div>
-                <div className="row">
-                    <div className="column">
-                        <p>6</p>
-                    </div>
-                    <div className="column">
-                        <p>
-                            {guesses[5]}
-                        </p>
-                    </div>
-                    <div className="column">
-                        <p>
-                            {hints[5]}
-                        </p>
-                    </div>
-                </div>
-                <div className="row">
-                    <div className="column">
-                        <p>7</p>
-                    </div>
-                    <div className="column">
-                        <p>
-                            {guesses[6]}
-                        </p>
-                    </div>
-                    <div className="column">
-                        <p>
-                            {hints[6]}
-                        </p>
-                    </div>
-                </div>
-                <div className="row">
-                    <div className="column">
-                        <p>8</p>
-                    </div>
-                    <div className="column">
-                        <p>
-                            {guesses[7]}
-                        </p>
-                    </div>
-                    <div className="column">
-                        <p>
-                            {hints[7]}
-                        </p>
-                    </div>
-                </div>
+                {guessesHints}
             </div>
         );
     }
@@ -316,7 +204,7 @@ function FourDigits() {
      * @param guesses array of all the guesses
      * @param gameOver a boolean flag representing if the game has ended
      * @param status string being placed into the status bar
-     * @returns {JSX.Element} an element containing status info
+     * @returns {JSX.Element}      an element containing status info
      * @constructor
      */
     function StatusBar({guesses, gameOver, status}) {
@@ -335,7 +223,6 @@ function FourDigits() {
                             {status}
                         </p>
                     </div>
-
                 </div>
             </div>
         );
