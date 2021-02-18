@@ -13,11 +13,21 @@ Specifically:
  */
 
 function FourDigits() {
-    const [guesses, setGuesses] = useState([]);
-    const [guess, setGuess] = useState("");
-    const [secret, setSecret] = useState(generateSecret());
-    const [hints, setHints] = useState([]);
-    const [status, setStatus] = useState("");
+    // const [guesses, setGuesses] = useState([]);
+    // const [guess, setGuess] = useState("");
+    // const [secret, setSecret] = useState(generateSecret());
+    // const [hints, setHints] = useState([]);
+    // const [status, setStatus] = useState("");
+
+    const [gameState, setGameState] = useState({
+        guesses: [],
+        guess: "",
+        secret: generateSecret(),
+        hints: [],
+        status: ""
+    });
+
+    let {guesses, guess, secret, hints, status} = gameState;
 
 
     /**
@@ -27,7 +37,7 @@ function FourDigits() {
      * @param ev event being invoked by the caller
      */
     function updateGuess(ev) {
-        if (hasGameEnded(guesses, secret)) {
+        if (hasGameEnded(gameState.guesses, gameState.secret)) {
             return;
         }
         let text = ev.target.value;
@@ -35,7 +45,10 @@ function FourDigits() {
         if (fieldLength > 4) {
             text = text.substr(0, 4);
         }
-        setGuess(text);
+        let status = text;
+        let state1 = Object.assign({}, gameState, {status});
+        setGameState(state1);
+        // setGuess(text);
     }
 
 
@@ -46,19 +59,34 @@ function FourDigits() {
      * Makes a guess if the game hasn't ended.
      */
     function makeGuess() {
-        if (hasGameEnded(guesses, secret)) {
+        if (hasGameEnded(gameState.guesses, gameState.secret)) {
             return;
         }
-        if (isValidInput(guess)) {
-            setStatus("");
-            console.log("secret: " + secret);
-            setGuesses(guesses.concat(guess));
-            setGuess("");
-            setHints(hints.concat(getHint(secret, guess)));
-            console.log("num guesses: " + guesses.length);
+        if (isValidInput(gameState.guess)) {
+            let newStatus = "";
+            let state1 = Object.assign({}, gameState, {newStatus});
+            setGameState(state1);
+            // setStatus("");
+            console.log("secret: " + gameState.secret);
+            let newGuesses = gameState.guesses.concat(gameState.guess);
+            let state2 = Object.assign({}, gameState, {newGuesses});
+            setGameState(state2);
+            // setGuesses(guesses.concat(guess));
+            let newGuess = "";
+            let state3 = Object.assign({}, gameState, {newGuess});
+            setGameState(state3);
+            // setGuess("");
+            let newHints = gameState.hints.concat(getHint(gameState.secret, gameState.guess));
+            let state4 = Object.assign({}, gameState, {newHints});
+            setGameState(state4);
+            // setHints(hints.concat(getHint(secret, guess)));
+            console.log("num guesses: " + gameState.guesses.length);
         } else {
             console.log("bad input");
-            setStatus("A guess must be a 4-digit unique integer (1-9)");
+            let newStatus = "A guess must be a 4-digit unique integer (1-9)";
+            let state5 = Object.assign({}, gameState, {newStatus});
+            setGameState(state5);
+            // setStatus("A guess must be a 4-digit unique integer (1-9)");
         }
     }
 
@@ -70,7 +98,7 @@ function FourDigits() {
      * @param ev the event invoked by the caller (key press)
      */
     function keypress(ev) {
-        if (hasGameEnded(guesses, secret)) {
+        if (hasGameEnded(gameState.guesses, gameState.secret)) {
             return;
         }
         if (ev.key === "Enter") {
@@ -83,11 +111,19 @@ function FourDigits() {
      * Resets the game by clearing all the sates.
      */
     function reset() {
-        setGuesses([]);
-        setGuess("");
-        setHints([]);
-        setStatus("");
-        setSecret(generateSecret);
+        let guesses = [];
+        let guess = "";
+        let hints = [];
+        let status = "";
+        let secret = generateSecret();
+        let state = Object.assign({}, gameState, {guesses}, {guess}, {hints}, {status}, {secret});
+        setGameState(state);
+
+        // setGuesses([]);
+        // setGuess("");
+        // setHints([]);
+        // setStatus("");
+        // setSecret(generateSecret);
     }
 
     return (
@@ -98,7 +134,7 @@ function FourDigits() {
                         <p>
                             <input type="text"
                                    onChange={updateGuess}
-                                   value={guess}
+                                   value={gameState.guess}
                                    onKeyPress={keypress}
                             />
                         </p>
@@ -112,11 +148,11 @@ function FourDigits() {
                 </div>
             </div>
 
-            <ResultTable guesses={guesses} hints={hints}/>
+            <ResultTable guesses={gameState.guesses} hints={gameState.hints}/>
 
-            <StatusBar guesses={guesses}
-                       gameOver={hasGameEnded(guesses, secret)}
-                       status={status}/>
+            <StatusBar guesses={gameState.guesses}
+                       gameOver={hasGameEnded(gameState.guesses, gameState.secret)}
+                       status={gameState.status}/>
 
         </div>
     );
