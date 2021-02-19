@@ -70,10 +70,8 @@ export function getHint(secret, guess) {
 
 /**
  * Returns if the game has ended.
- * @param guesses array containing all previous guesses
- * @param secret the secret generated in the beginning of the game
- * @returns {boolean|*} "true" if the game has ended and "false" otherwise
+ * @param status the status of the game
  */
-export function hasGameEnded(guesses, secret) {
-    return guesses.length >= 8 || guesses.includes(secret);
+export function hasGameEnded(status) {
+    return (status === "You won!" || status === "You lost!");
 }

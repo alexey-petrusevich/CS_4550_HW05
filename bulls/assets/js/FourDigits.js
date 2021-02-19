@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from 'react'
 import "milligram";
-import {generateSecret, isValidInput, getHint, hasGameEnded} from "./game";
-import {ch_push, ch_join} from "./socket";
+import {hasGameEnded} from "./game";
+import {ch_push, ch_join, ch_reset} from "./socket";
 
 /*
 NOTE (regarding plagiarism):
@@ -16,13 +16,13 @@ Specifically:
 function FourDigits() {
     const [gameState, setGameState] = useState({
         guesses: [],
-        guess: "",
-        secret: generateSecret(),
         hints: [],
         status: ""
     });
     // for textfield
     const [guess, setGuess] = useState("");
+
+    let {guesses, hints, status} = gameState;
 
     useEffect(() => {
         ch_join(setGameState)
@@ -35,7 +35,7 @@ function FourDigits() {
      * @param ev event being invoked by the caller
      */
     function updateGuess(ev) {
-        if (hasGameEnded(gameState.guesses, gameState.secret)) {
+        if (hasGameEnded(status)) {
             console.log("update guess -> game ended")
             return;
         }
@@ -66,7 +66,7 @@ function FourDigits() {
      * @param ev the event invoked by the caller (key press)
      */
     function keypress(ev) {
-        if (hasGameEnded(gameState.guesses, gameState.secret)) {
+        if (hasGameEnded(status)) {
             console.log("game ended");
             return;
         }
@@ -82,14 +82,8 @@ function FourDigits() {
      * Resets the game by clearing all the sates.
      */
     function reset() {
-        let newState = Object.assign({}, gameState, {
-            guesses: [],
-            guess: "",
-            hints: [],
-            status: "",
-            secret: generateSecret()
-        });
-        setGameState(newState);
+        console.log("game reset");
+        ch_reset();
     }
 
     return (
@@ -114,11 +108,9 @@ function FourDigits() {
                 </div>
             </div>
 
-            <ResultTable guesses={gameState.guesses} hints={gameState.hints}/>
+            <ResultTable guesses={guesses} hints={hints}/>
 
-            <StatusBar guesses={gameState.guesses}
-                       gameOver={hasGameEnded(gameState.guesses, gameState.secret)}
-                       status={gameState.status}/>
+            <StatusBar status={status}/>
 
         </div>
     );
@@ -184,20 +176,11 @@ function FourDigits() {
 
     /**
      * Returns the status bar that displays errors or win/lose message
-     * @param guesses array of all the guesses
-     * @param gameOver a boolean flag representing if the game has ended
      * @param status string being placed into the status bar
      * @returns {JSX.Element}      an element containing status info
      * @constructor
      */
-    function StatusBar({guesses, gameOver, status}) {
-        if (gameOver) {
-            if (guesses.length < 8) {
-                status = "You won!";
-            } else {
-                status = "You lost!";
-            }
-        }
+    function StatusBar({status}) {
         return (
             <div className="status">
                 <div className="row">

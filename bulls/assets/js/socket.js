@@ -84,6 +84,14 @@ export function ch_push(guess) {
         .receive("error", resp => console.log("unable to push", resp));
 }
 
+export function ch_reset() {
+    channel.push("reset", {})
+        .receive("ok", state_update)
+        .receive("error", resp => {
+            console.log("unable to push", resp)
+        });
+}
+
 channel.join()
   .receive("ok", state_update())
   .receive("error", resp => { console.log("Unable to join", resp) })
