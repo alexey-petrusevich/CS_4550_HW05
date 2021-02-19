@@ -1,7 +1,9 @@
 #!/bin/bash
-# This is deploy.sh
 
 export MIX_ENV=prod
+# Common port range for this is 4000-10,000
+# Valid port range for a user app to listen
+# on is something like 1025-32767
 export PORT=4801
 export SECRET_KEY_BASE=insecure
 
@@ -11,7 +13,7 @@ mix compile
 CFGD=$(readlink -f ~/.config/bulls)
 
 if [ ! -d "$CFGD" ]; then
-    mkdir -p $CFGD
+    mkdir -p "$CFGD"
 fi
 
 if [ ! -e "$CFGD/base" ]; then
