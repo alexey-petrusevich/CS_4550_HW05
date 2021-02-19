@@ -4,7 +4,6 @@ defmodule FourDigits.Game do
   def new() do
     %{
       guesses: MapSet.new(),
-      guess: "",
       secret: generateSecret(),
       hints: [],
       status: ""
@@ -13,32 +12,47 @@ defmodule FourDigits.Game do
 
 
   # replacement for FourDigits.js version of makeGuess
-  def makeGuess(state, guess) do
-    # TODO: do stuff
+  def makeGuess(state, newGuess) do
+    # update state (map) with new value of guesses
+    # put new guess into state.guesses
+    %{state | guesses: MapSet.put(state.guesses, newGuess)}
   end
 
 
   # returns a view to the user (what the user should see)
   def view(state) do
     # TODO: implement
+    # guesses, hints, status
   end
 
   # generates a random 4-digit integer
   def generateSecret() do
     temp = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+    # result here contains a map of four integers
     result = generateSecretHelp(temp, MapSet.new, 4)
-    # TODO: translate map into 4-character string
-    result
+    # translate map into 4-character string
+    mapToString(MapSet.to_list(result), "");
   end
 
-  def generateSecretHelp(list, set, count) do
-    if (count > 0) do
-      el = Enum.random(temp)
-      set.put(el)
-      temp = temp -- el
-      generateSecretHelp(temp, set, count - 1)
+  # returns a string representation of the list
+  defp mapToString(list, result) do
+    if (Enum.size(list) > 0) do
+      result = result <> to_string(hd(list))
+      mapToString(tl(list), result)
     else
-      set
+      result
+    end
+  end
+
+  # returns a mapSet containing 4 unique integers
+  defp generateSecretHelp(list, mapSet, count) do
+    if (count > 0) do
+      el = Enum.random(list)
+      mapSet.put(el)
+      list = list -- el
+      generateSecretHelp(list, mapSet, count - 1)
+    else
+      mapSet
     end
   end
 

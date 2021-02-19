@@ -20,6 +20,8 @@ function FourDigits() {
         hints: [],
         status: ""
     });
+    // for textfield
+    const [guess, setGuess] = useState("");
 
     /**
      * Event handler for handling change of the text field
@@ -37,8 +39,7 @@ function FourDigits() {
         if (fieldLength > 4) {
             text = text.substr(0, 4);
         }
-        let newState = Object.assign({}, gameState, {guess: text});
-        setGameState(newState);
+        setGuess(text);
     }
 
 
@@ -53,11 +54,11 @@ function FourDigits() {
             console.log("make guess -> game ended");
             return;
         }
-        if (isValidInput(gameState.guess)) {
+        if (isValidInput(guess)) {
             console.log("valid input ->");
             console.log("secret: " + gameState.secret);
-            let newGuesses = gameState.guesses.concat(gameState.guess);
-            let newHints = gameState.hints.concat(getHint(gameState.secret, gameState.guess));
+            let newGuesses = gameState.guesses.concat(guess);
+            let newHints = gameState.hints.concat(getHint(gameState.secret, guess));
             let newState = Object.assign({}, gameState, {
                 guesses: newGuesses,
                 guess: "",
@@ -117,7 +118,7 @@ function FourDigits() {
                         <p>
                             <input type="text"
                                    onChange={updateGuess}
-                                   value={gameState.guess}
+                                   value={guess}
                                    onKeyPress={keypress}
                             />
                         </p>
