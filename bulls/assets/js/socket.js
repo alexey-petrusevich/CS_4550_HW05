@@ -8,7 +8,7 @@
 // from the params if you are not using authentication.
 import {Socket} from "phoenix"
 
-let socket = new Socket("/socket", {params: {token: window.userToken}})
+let socket = new Socket("/socket", {params: {token: ""}})
 
 // When you connect, you'll often need to authenticate the client.
 // For example, imagine you have an authentication plug, `MyAuth`,
@@ -55,9 +55,37 @@ let socket = new Socket("/socket", {params: {token: window.userToken}})
 socket.connect()
 
 // Now that you are connected, you can join channels with a topic:
-let channel = socket.channel("topic:subtopic", {})
+let channel = socket.channel("game:1", {})
+
+let state = {
+    guesses: [],
+    hints: [],
+    status: ""
+}
+
+let callback = null;
+
+function state_update(st) {
+    console.log("New State", st);
+    state = st;
+    if (callback) {
+        callback(st);
+    }
+}
+
+export function ch_join(cb) {
+    callback = cb;
+    callback(state)
+}
+
+export function ch_push(guess) {
+    channel.push("newGuess", guess)
+        .receive("ok", state_update())
+        .receive("error", resp => console.log("unable to push", resp));
+}
+
 channel.join()
-  .receive("ok", resp => { console.log("Joined successfully", resp) })
+  .receive("ok", state_update())
   .receive("error", resp => { console.log("Unable to join", resp) })
 
 export default socket

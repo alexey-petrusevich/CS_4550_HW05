@@ -1,6 +1,7 @@
-import React, {useState} from 'react'
+import React, {useState, useEffect} from 'react'
 import "milligram";
 import {generateSecret, isValidInput, getHint, hasGameEnded} from "./game";
+import {ch_push, ch_join} from "./socket";
 
 /*
 NOTE (regarding plagiarism):
@@ -22,6 +23,10 @@ function FourDigits() {
     });
     // for textfield
     const [guess, setGuess] = useState("");
+
+    useEffect(() => {
+        ch_join(setGameState)
+    })
 
     /**
      * Event handler for handling change of the text field
@@ -50,30 +55,7 @@ function FourDigits() {
      * Makes a guess if the game hasn't ended.
      */
     function makeGuess() {
-        if (hasGameEnded(gameState.guesses, gameState.secret)) {
-            console.log("make guess -> game ended");
-            return;
-        }
-        if (isValidInput(guess)) {
-            console.log("valid input ->");
-            console.log("secret: " + gameState.secret);
-            let newGuesses = gameState.guesses.concat(guess);
-            let newHints = gameState.hints.concat(getHint(gameState.secret, guess));
-            let newState = Object.assign({}, gameState, {
-                guesses: newGuesses,
-                guess: "",
-                hints: newHints,
-                status: ""
-            });
-            setGameState(newState);
-            console.log("num guesses: " + gameState.guesses.length);
-            console.log("guesses -> " + gameState.guesses.toString());
-        } else {
-            console.log("bad input");
-            let newStatus = "A guess must be a 4-digit unique integer (1-9)";
-            let newState = Object.assign({}, gameState, {status: newStatus});
-            setGameState(newState);
-        }
+        ch_push(guess);
     }
 
 

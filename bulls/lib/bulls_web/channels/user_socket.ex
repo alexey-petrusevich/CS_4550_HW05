@@ -2,7 +2,8 @@ defmodule BullsWeb.UserSocket do
   use Phoenix.Socket
 
   ## Channels
-  # channel "room:*", BullsWeb.RoomChannel
+  channel "room:*", BullsWeb.RoomChannel
+
 
   # Socket params are passed from the client and can
   # be used to verify and authenticate a user. After
