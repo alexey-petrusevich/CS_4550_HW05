@@ -22,17 +22,21 @@ function state_update(st) {
 }
 
 export function ch_join(cb) {
+    console.log("ch_join called cb: " + cb)
     callback = cb;
+    console.log("calling callback")
     callback(state)
 }
 
 export function ch_push(guess) {
+    console.log("ch_push called guess: " + guess)
     channel.push("guess", guess)
         .receive("ok", state_update())
         .receive("error", resp => console.log("unable to push", resp));
 }
 
 export function ch_reset() {
+    console.log("ch_reset called")
     channel.push("reset", {})
         .receive("ok", state_update)
         .receive("error", resp => {
@@ -41,7 +45,9 @@ export function ch_reset() {
 }
 
 channel.join()
-  .receive("ok", state_update())
-  .receive("error", resp => { console.log("Unable to join", resp) })
+    .receive("ok", state_update())
+    .receive("error", resp => {
+        console.log("Unable to join", resp)
+    })
 
 export default socket
