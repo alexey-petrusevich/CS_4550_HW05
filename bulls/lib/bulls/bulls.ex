@@ -1,13 +1,12 @@
 defmodule FourDigits.Game do
 
-  # returns new game
+  # returns new game?
   def new() do
     %{
       guesses: MapSet.new(),
       secret: generateSecret(),
       hints: [],
       status: ""
-      # used for input validation or win/lose game state
     }
   end
 
@@ -36,6 +35,7 @@ defmodule FourDigits.Game do
     secretList = String.codepoints(secret)
     guessList = String.codePoints(guess)
     hintCounts = %{numA: 0, numB: 0}
+    # this call returns a map with hintCounts populated
     hintCounts = getHintHelper(secretList, secretList, guessList, hintCounts)
   end
 
@@ -112,8 +112,8 @@ defmodule FourDigits.Game do
   def generateSecretHelp(list, mapSet, count) do
     if (count > 0) do
       el = Enum.random(list)
-      mapSet.put(el)
-      list = list -- el
+      mapSet = MapSet.put(mapSet, el)
+      list = List.delete(list, el)
       generateSecretHelp(list, mapSet, count - 1)
     else
       mapSet
