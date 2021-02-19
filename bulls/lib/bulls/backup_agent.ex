@@ -1,9 +1,6 @@
 defmodule FourDigits.BackupAgent do
   use Agent
 
-  # This is basically just a global mutable map.
-  # TODO: Add timestamps and expiration.
-
   def start_link(_args) do
     Agent.start_link(fn -> %{} end, name: __MODULE__)
   end

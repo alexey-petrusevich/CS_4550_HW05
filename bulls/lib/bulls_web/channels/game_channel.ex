@@ -1,15 +1,19 @@
 defmodule BullsWeb.GameChannel do
   use BullsWeb, :channel
 
+  alias FourDigits.Game
+  alias FourDigits.BackupAgent
+
   @impl true
   def join("game:" <> name, payload, socket) do
     if authorized?(payload) do
-      game = BackupAgent.get(name) || FourDigits.Game.new()
+      game = BackupAgent.get(name) || Game.new()
       socket = socket
-               |> assign(:game, game)
                |> assign(:name, name)
+               |> assign(:game, game)
       BackupAgent.put(name, game)
-      {:ok, %{"join" => name, "game" => FourDigits.Game.client_view(game)}, socket}
+      view = Game.view(game)
+      {:ok, view, socket}
     else
       {:error, %{reason: "unauthorized"}}
     end
@@ -17,19 +21,20 @@ defmodule BullsWeb.GameChannel do
 
   @impl true
   def handle_in("guess", %{"newGuess" => newGuess}, socket) do
-    name = socket.assigns[:name]
-    game = FourDigits.Game.guess(socket.assigns[:game], newGuess)
-    socket = assign(socket, :game, game)
-    BackupAgent.put(name, game)
-    {:reply, {:ok, %{ "game" => FourDigits.Game.view(game)}}, socket}
+    game0 = socket.assigns[:game]
+    game1 = Game.guess(game0, newGuess)
+    socket1 = assign(socket, :game, game1)
+    BackupAgent.put(socket.assigns[:name], game1)
+    view = Game.view(game1)
+    {:reply, {:ok, view}, socket1}
   end
 
 
   @impl true
   def handle_in("reset", _, socket) do
-    game = FourDigits.Game.new
+    game = Game.new
     socket = assign(socket, :game, game)
-    view = FourDigits.Game.view(game)
+    view = Game.view(game)
     {:reply, {:ok, view}, socket}
   end
 
