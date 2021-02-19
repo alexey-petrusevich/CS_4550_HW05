@@ -7,22 +7,86 @@ defmodule FourDigits.Game do
       secret: generateSecret(),
       hints: [],
       status: ""
+      # used for input validation or win/lose game state
     }
   end
 
 
   # replacement for FourDigits.js version of makeGuess
   def makeGuess(state, newGuess) do
-    # update state (map) with new value of guesses
-    # put new guess into state.guesses
-    %{state | guesses: MapSet.put(state.guesses, newGuess)}
+    if (isValidInput(newGuess)) do
+      newHint = getHint(state.secret)
+      state = %{state | hints: state.hints ++ newHint}
+      %{state | guesses: MapSet.put(state.guesses, newGuess)}
+    else
+      %{state | status: "A guess must be a 4-digit unique integer (1-9)"}
+    end
+  end
+
+  # returns true if input is a valid guess and false otherwise
+  defp isValidInput(input) do
+    # TODO: implement
+    true
+  end
+
+  # returns a hint (string) given a guess (string)
+  # assumes that secret.length and guess.length are equal
+  defp getHint(secret, guess) do
+    # TODO: implement
+    secretList = String.codepoints(secret)
+    guessList = String.codePoints(guess)
+    hintCounts = %{numA: 0, numB: 0}
+    hintCounts = getHintHelper(secretList, secretList, guessList, hintCounts)
+  end
+
+  # returns a map containing As and Bs for bulls and cows game
+  # assumes secretList, and guessList have same length
+  def getHintHelper(secretListOriginal, secretList, guessList, hintCounts) do
+    if (length(secretList) > 0) do
+      cond do
+        # A - places match
+        hd(secretList) == hd(guessList) ->
+          getHintHelper(
+            secretListOriginal,
+            tl(secretList),
+            tl(guessList),
+            %{hintCounts | numA: hintCounts.numA + 1}
+          )
+        # B - secret contains a guess character
+        Enum.member?(secretListOriginal, hd(guessList)) ->
+          getHintHelper(
+            secretListOriginal,
+            tl(secretList),
+            tl(guessList),
+            %{hintCounts | numB: hintCounts.numB + 1}
+          )
+        true -> # nothing found, check rest
+          getHintHelper(
+            secretListOriginal,
+            tl(secretList),
+            tl(guessList),
+            hintCounts
+          )
+      end
+    else
+      hintCounts
+    end
+  end
+
+  # returns true if the game has ended and false otherwise
+  def hasGameEnded(guesses, secret) do
+    (length(guesses) >= 8 || Enum.member?(guesses, secret))
   end
 
 
   # returns a view to the user (what the user should see)
   def view(state) do
-    # TODO: implement
-    # guesses, hints, status
+    # return a map with guesses, hints, and status
+    %{
+      guesses: MapSet.toList(state.guesses),
+      hints: state.hints,
+      status: state.status
+    }
   end
 
   # generates a random 4-digit integer
@@ -35,8 +99,8 @@ defmodule FourDigits.Game do
   end
 
   # returns a string representation of the list
-  defp mapToString(list, result) do
-    if (Enum.size(list) > 0) do
+  def mapToString(list, result) do
+    if (length(list) > 0) do
       result = result <> to_string(hd(list))
       mapToString(tl(list), result)
     else
@@ -45,7 +109,7 @@ defmodule FourDigits.Game do
   end
 
   # returns a mapSet containing 4 unique integers
-  defp generateSecretHelp(list, mapSet, count) do
+  def generateSecretHelp(list, mapSet, count) do
     if (count > 0) do
       el = Enum.random(list)
       mapSet.put(el)
