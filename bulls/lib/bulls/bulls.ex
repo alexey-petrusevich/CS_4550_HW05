@@ -3,29 +3,64 @@ defmodule FourDigits.Game do
   # returns new game?
   def new() do
     %{
-      guesses: MapSet.new(),
+      guesses: [],
       secret: generateSecret(),
       hints: [],
       status: ""
     }
   end
 
-
   # replacement for FourDigits.js version of makeGuess
   def makeGuess(state, newGuess) do
     if (isValidInput(newGuess)) do
-      newHint = getHint(state.secret)
-      state = %{state | hints: state.hints ++ newHint}
-      %{state | guesses: MapSet.put(state.guesses, newGuess)}
+      cond do
+        hasGameWon(state.guesses, state.secret, newGuess) ->
+          %{state | status: "You won!"}
+        hasGameLost(state.guesses) ->
+          %{state | status: "You lost!"}
+        true ->
+          newHint = getHint(state.secret, newGuess)
+          state = %{state | hints: state.hints ++ [newHint]}
+          state = %{state | guesses: state.guesses ++ [newGuess]}
+          if (String.length(state.status) > 0) do
+            %{state | status: ""}
+          else
+            state
+          end
+      end
     else
       %{state | status: "A guess must be a 4-digit unique integer (1-9)"}
     end
   end
 
   # returns true if input is a valid guess and false otherwise
+  # NOTE: does not check uniqueness
   def isValidInput(input) do
-    # TODO: implement
-    true
+    if (String.length(input) < 4) do
+      false
+    else
+      strList = String.codepoints(input)
+      isValidInputHelper(strList)
+    end
+  end
+
+  # helper for isValidInput, but accept a list of characters
+  def isValidInputHelper(list) do
+    if (length(list) > 0) do
+      isValidChar(hd(list)) && isValidInputHelper(tl(list))
+    else
+      true
+    end
+  end
+
+  # returns true if given character is valid for isValidInput
+  def isValidChar(char) do
+    iValue = Integer.parse(char)
+    cond do
+      iValue == :error -> false
+      elem(iValue, 0) < 1 -> false
+      true -> true
+    end
   end
 
   # returns a hint (string) given a guess (string)
@@ -83,17 +118,20 @@ defmodule FourDigits.Game do
     end
   end
 
-  # returns true if the game has ended and false otherwise
-  def hasGameEnded(guesses, secret) do
-    (length(guesses) >= 8 || Enum.member?(guesses, secret))
+  # returns true if game has been lost
+  def hasGameLost(guesses) do
+    length(guesses) >= 7
   end
 
+  def hasGameWon(guesses, secret, newGuess) do
+    Enum.member?(guesses, secret) || (newGuess == secret)
+  end
 
   # returns a view to the user (what the user should see)
   def view(state) do
     # return a map with guesses, hints, and status
     %{
-      guesses: MapSet.toList(state.guesses),
+      guesses: state.guesses,
       hints: state.hints,
       status: state.status
     }
