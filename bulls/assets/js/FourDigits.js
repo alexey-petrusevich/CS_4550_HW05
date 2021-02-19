@@ -55,7 +55,7 @@ function FourDigits() {
      * Makes a guess if the game hasn't ended.
      */
     function makeGuess() {
-        ch_push({newGuess: guess});
+        ch_push({guess: guess});
     }
 
 

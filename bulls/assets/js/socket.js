@@ -1,4 +1,4 @@
-import {Socket} from "phoenix"
+import {Socket} from "phoenix";
 
 let socket = new Socket("/socket", {params: {token: ""}})
 socket.connect()
@@ -31,7 +31,7 @@ export function ch_join(cb) {
 export function ch_push(guess) {
     console.log("ch_push called guess: " + guess)
     channel.push("guess", guess)
-        .receive("ok", state_update())
+        .receive("ok", state_update)
         .receive("error", resp => console.log("unable to push", resp));
 }
 
@@ -43,11 +43,12 @@ export function ch_reset() {
             console.log("unable to push", resp)
         });
 }
-
+console.log("calling channel.join")
 channel.join()
-    .receive("ok", state_update())
+    .receive("ok", state_update)
     .receive("error", resp => {
         console.log("Unable to join", resp)
     })
+console.log("received from join")
 
 export default socket

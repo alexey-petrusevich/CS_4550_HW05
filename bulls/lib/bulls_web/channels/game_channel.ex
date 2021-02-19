@@ -4,10 +4,19 @@ defmodule BullsWeb.GameChannel do
   alias FourDigits.Game
   alias FourDigits.BackupAgent
 
+  def getGame(name) do
+    game = BackupAgent.get(name)
+    if (game == nil) do
+      Game.new
+    else
+      game
+    end
+  end
+
   @impl true
   def join("game:" <> name, payload, socket) do
     if authorized?(payload) do
-      game = BackupAgent.get(name) || Game.new()
+      game = getGame(name)
       socket = socket
                |> assign(:name, name)
                |> assign(:game, game)
@@ -20,9 +29,9 @@ defmodule BullsWeb.GameChannel do
   end
 
   @impl true
-  def handle_in("guess", %{"newGuess" => newGuess}, socket) do
+  def handle_in("guess", %{"guess" => guess}, socket) do
     game0 = socket.assigns[:game]
-    game1 = Game.guess(game0, newGuess)
+    game1 = Game.makeGuess(game0, guess)
     socket1 = assign(socket, :game, game1)
     BackupAgent.put(socket.assigns[:name], game1)
     view = Game.view(game1)
