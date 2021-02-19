@@ -24,6 +24,7 @@ SECRET_KEY_BASE=$(cat "$CFGD/base")
 export SECRET_KEY_BASE
 
 npm install --prefix ./assets
+npm install milligram --prefix ./assets
 npm run deploy --prefix ./assets
 mix phx.digest
 
