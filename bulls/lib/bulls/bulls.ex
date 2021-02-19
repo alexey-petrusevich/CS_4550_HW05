@@ -23,20 +23,30 @@ defmodule FourDigits.Game do
   end
 
   # returns true if input is a valid guess and false otherwise
-  defp isValidInput(input) do
+  def isValidInput(input) do
     # TODO: implement
     true
   end
 
   # returns a hint (string) given a guess (string)
   # assumes that secret.length and guess.length are equal
-  defp getHint(secret, guess) do
-    # TODO: implement
+  def getHint(secret, guess) do
     secretList = String.codepoints(secret)
-    guessList = String.codePoints(guess)
+    guessList = String.codepoints(guess)
     hintCounts = %{numA: 0, numB: 0}
     # this call returns a map with hintCounts populated
     hintCounts = getHintHelper(secretList, secretList, guessList, hintCounts)
+    hintMapToString(hintCounts)
+  end
+
+  # returns a string representation of the given map of hints
+  def hintMapToString(map) do
+    result = ""
+    result = result <> to_string(elem(Map.fetch(map, :numA), 1))
+    result = result <> "A"
+    result = result <> to_string(elem(Map.fetch(map, :numB), 1))
+    result = result <> "B"
+    result
   end
 
   # returns a map containing As and Bs for bulls and cows game
@@ -98,7 +108,7 @@ defmodule FourDigits.Game do
     mapToString(MapSet.to_list(result), "");
   end
 
-  # returns a string representation of the list
+  # returns a string representation of the list (map)
   def mapToString(list, result) do
     if (length(list) > 0) do
       result = result <> to_string(hd(list))
