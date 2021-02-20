@@ -67,5 +67,6 @@
     <orderEntry type="library" name="mime" level="project" />
     <orderEntry type="library" name="html_entities" level="project" />
     <orderEntry type="library" name="phoenix_live_reload" level="project" />
+    <orderEntry type="library" name="cowboy" level="project" />
   </component>
 </module>
